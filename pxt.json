@@ -1,0 +1,26 @@
+{
+    "name": "Humidor1 #2",
+    "description": "",
+    "dependencies": {
+        "core": "*",
+        "pxt-oled-ssd1306": "github:MKleinSB/pxt-OLED-SSD1306#v0.0.5",
+        "pxt-dht11": "github:MKleinSB/pxt-dht11#v0.0.3"
+    },
+    "files": [
+        "main.blocks",
+        "main.ts",
+        "README.md",
+        "main.py"
+    ],
+    "testFiles": [
+        "test.ts"
+    ],
+    "targetVersions": {
+        "target": "4.0.29",
+        "targetId": "calliopemini"
+    },
+    "supportedTargets": [
+        "calliopemini"
+    ],
+    "preferredEditor": "blocksprj"
+}
