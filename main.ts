@@ -19,9 +19,15 @@ function fkt_InitDisplay () {
         }
     }
 }
+input.onButtonEvent(Button.A, input.buttonEventClick(), function () {
+    fkt_InitDisplay()
+})
 let Anfeuchten = false
 let FMag = 0
 let FZig = 0
+let SekundentimerMerker = false
+let StundentimerMerker = false
+let Startzyklus_gelaufen = false
 let ULüfter = false
 let MLüfter = false
 MLüfter = false
@@ -31,7 +37,6 @@ let Sekundentimer = false
 let Stundentimer = false
 let Anfeuchtzähler = 0
 fkt_InitDisplay()
-let Startzyklus_gelaufen = true
 // Entspricht 0.5 Stunde
 // 
 loops.everyInterval(1800000, function () {
@@ -40,6 +45,14 @@ loops.everyInterval(1800000, function () {
         fkt_InitDisplay()
         music.playTone(262, music.beat(BeatFraction.Whole))
         Stundentimer = !(Stundentimer)
+        oledssd1306.setTextXY(0, 0)
+        oledssd1306.writeString("Stundentimer:")
+        oledssd1306.setTextXY(0, 13)
+        if (Stundentimer) {
+            oledssd1306.writeNumber(1)
+        } else {
+            oledssd1306.writeNumber(0)
+        }
     }
 })
 loops.everyInterval(2000, function () {
@@ -47,6 +60,8 @@ loops.everyInterval(2000, function () {
     Blinker = !(Blinker)
 })
 basic.forever(function () {
+    StundentimerMerker = Stundentimer
+    SekundentimerMerker = Sekundentimer
     // Blinkende Anzahl von Anfeuchtzyklen als Lebenszeichen
     oledssd1306.setTextXY(6, 7)
     if (Blinker) {
@@ -55,7 +70,7 @@ basic.forever(function () {
         oledssd1306.clearRange(15)
     }
     // Feuchtemessung und Displayausgabe alle 2Sekunden
-    if (Sekundentimer) {
+    if (SekundentimerMerker) {
         Sekundentimer = false
         DHT11.setPin(DigitalPin.C17)
         FZig = DHT11.humidity()
@@ -78,7 +93,7 @@ basic.forever(function () {
         }
     }
     // Motoransteuerung Feuchteregelung
-    if (FZig < 68) {
+    if (FZig <= 69) {
         Anfeuchten = true
         if (!(MLüfter)) {
             Anfeuchtzähler += 1
@@ -94,13 +109,13 @@ basic.forever(function () {
             oledssd1306.writeString("AN ")
         }
     }
-    if (FZig > 72) {
+    if (FZig >= 71) {
         Anfeuchten = false
         motors.dualMotorPower(Motor.A, 0)
         MLüfter = false
         oledssd1306.setTextXY(5, 3)
         oledssd1306.writeString("AUS")
-        if (!(Stundentimer)) {
+        if (!(StundentimerMerker)) {
             motors.dualMotorPower(Motor.B, 0)
             ULüfter = false
             oledssd1306.setTextXY(5, 11)
@@ -108,10 +123,11 @@ basic.forever(function () {
         }
     }
     // Motoransteuerung Umluft
-    if (Stundentimer && !(ULüfter)) {
+    if (StundentimerMerker && !(ULüfter)) {
         motors.dualMotorPower(Motor.B, 100)
         ULüfter = true
         oledssd1306.setTextXY(5, 11)
         oledssd1306.writeString("AN ")
     }
+    Startzyklus_gelaufen = true
 })
